@@ -22,12 +22,14 @@ async function CaseFile({ params }: { params: Promise<{ id: string }> }) {
 
   const messages = book.interactions
     .filter((interaction) => item.interactionIds.includes(interaction.id))
-    .sort((left, right) => Date.parse(left.receivedAt) - Date.parse(right.receivedAt));
-  const first = messages[0];
-  if (!first) notFound();
+    .sort((left, right) => Date.parse(right.receivedAt) - Date.parse(left.receivedAt));
+  const latest = messages[0];
+  const first = messages[messages.length - 1];
+  if (!latest || !first) notFound();
   const incident = book.incidents.find((entry) => entry.caseIds.includes(item.id));
   const draft = incident ? await draftIncident(incident) : null;
-  const payment = first.link.targetId ? await db.select().from(transactions).where(eq(transactions.id, first.link.targetId)) : [];
+  const targetId = latest.link.targetId ?? first.link.targetId;
+  const payment = targetId ? await db.select().from(transactions).where(eq(transactions.id, targetId)) : [];
   const linked = payment[0];
 
   return (
@@ -59,7 +61,7 @@ async function CaseFile({ params }: { params: Promise<{ id: string }> }) {
         <span>
           {incident ? <Mark label={incident.label} /> : null}{" "}
           <span className="meta">
-            {first.location ?? "Location not given"}
+            {latest.location ?? first.location ?? "Location not given"}
             {incident ? ` · ${incident.title}` : ""}
           </span>
         </span>
@@ -80,26 +82,32 @@ async function CaseFile({ params }: { params: Promise<{ id: string }> }) {
         <div className="stat">
           <strong>{linked ? 1 : 0}</strong>
           <span>Linked payment</span>
-          <em>{linkName(first.link.status)}</em>
+          <em>{linkName(latest.link.status ?? first.link.status)}</em>
         </div>
         <div className="stat">
-          <strong className="words">{first.amount ? naira(first.amount) : "None"}</strong>
+          <strong className="words">{latest.amount ?? first.amount ? naira((latest.amount ?? first.amount)!) : "None"}</strong>
           <span>Amount named</span>
-          <em>{first.classification.domain === "payment" ? "What the customer said was moved" : "This case is not about money"}</em>
+          <em>{latest.classification.domain === "payment" ? "What the customer said was moved" : "This case is not about money"}</em>
         </div>
       </section>
 
       <div className="split">
         <section>
           <div className="section-head">
-            <h2>Contacts, in order</h2>
-            <p>Original wording</p>
+            <h2>Contacts (Newest first)</h2>
+            <p>Original customer wording · {messages.length} total</p>
           </div>
           <ol className="timeline">
             {messages.map((message, index) => (
               <li key={message.id}>
                 <div className="when">
-                  {index === 0 ? "First contact" : index === messages.length - 1 && messages.length > 1 ? "Latest contact" : "Follow-up"}
+                  {index === 0
+                    ? messages.length > 1
+                      ? "Latest contact"
+                      : "Initial contact"
+                    : index === messages.length - 1
+                      ? "First contact"
+                      : "Follow-up"}
                   <span className="channel">
                     {channelName(message.channel)} · {lagosTime(message.receivedAt)}
                   </span>
@@ -115,11 +123,11 @@ async function CaseFile({ params }: { params: Promise<{ id: string }> }) {
         <aside className="side-stack">
           <article className="side-card">
             <p className="aside-label">Linked payment</p>
-            <h3 style={{ marginTop: 8, fontSize: 18 }}>{first.rrn ?? "No reference quoted"}</h3>
+            <h3 style={{ marginTop: 8, fontSize: 18 }}>{latest.rrn ?? first.rrn ?? "No reference quoted"}</h3>
             <p>
               {linked
                 ? `${naira(linked.amount)} · response ${linked.responseCode ?? "—"} · ${linked.status}`
-                : linkName(first.link.status)}
+                : linkName(latest.link.status ?? first.link.status)}
             </p>
           </article>
           {incident ? (

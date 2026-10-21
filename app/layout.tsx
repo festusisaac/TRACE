@@ -4,6 +4,9 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { DeskNav } from "@/components/desk-nav";
+import { GlobalSearch } from "@/components/global-search";
+import { LiveBook } from "@/components/live-book";
+import { PitchSimulator } from "@/components/pitch-simulator";
 import "./globals.css";
 
 const plexSans = IBM_Plex_Sans({
@@ -19,8 +22,11 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TRACE",
+  title: "TRACE · Incident Triage & Resolution",
   description: "Triage and Root-cause Analysis of Customer Engagements",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -29,7 +35,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body>
         <div className="desk">
           <header className="topbar">
-            <Link className="brand" href="/">
+            <Link className="brand" href="/" style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <img
+                src="/logo.png"
+                alt="TRACE Logo"
+                width={55}
+                height={44}
+                style={{ height: 44, width: "auto", objectFit: "contain", flexShrink: 0 }}
+              />
               <strong>TRACE</strong>
               <span className="brand-rule" aria-hidden="true" />
               <span className="brand-copy">
@@ -37,14 +50,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 <span>of Customer Engagements</span>
               </span>
             </Link>
-            <p className="environment">
-              <span>Operations desk / demonstration</span>
-              <span>Demo snapshot · 21 Oct 2026</span>
-            </p>
+            <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+              <GlobalSearch />
+              <p className="environment">
+                <span>Operations desk / demonstration</span>
+                <span>Demo snapshot · 21 Oct 2026</span>
+              </p>
+            </div>
           </header>
           <div className="workspace">
             <Suspense fallback={<nav className="menubar" aria-hidden="true" />}>
               <DeskNav />
+              <LiveBook />
             </Suspense>
             <div className="workspace-main">
               <div className="main">{children}</div>
@@ -80,6 +97,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </div>
           </div>
         </div>
+        <PitchSimulator />
       </body>
     </html>
   );

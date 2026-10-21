@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { demoComplaints, type DemoComplaint } from "@/lib/demo-intake.ts";
 import { channels, type Channel } from "@/lib/engine/types.ts";
@@ -35,6 +35,27 @@ const emptyForm: FormState = {
   location: "",
 };
 
+const draftKey = "trace-intake-draft";
+
+function newSourceRef() {
+  const bytes = new Uint8Array(8);
+  crypto.getRandomValues(bytes);
+  const suffix = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return `desk-${Date.now().toString(36)}-${suffix}`;
+}
+
+function readDraft(): { form: FormState; slip: Filed | null } | null {
+  try {
+    const raw = sessionStorage.getItem(draftKey);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { form?: Partial<FormState>; slip?: Filed | null };
+    if (!parsed.form) return null;
+    return { form: { ...emptyForm, ...parsed.form }, slip: parsed.slip ?? null };
+  } catch {
+    return null;
+  }
+}
+
 function matchingExample(form: FormState) {
   return demoComplaints.find(
     (complaint) =>
@@ -53,6 +74,21 @@ export function IntakeDesk() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [slip, setSlip] = useState<Filed | null>(null);
+  const [draftReady, setDraftReady] = useState(false);
+
+  useEffect(() => {
+    const saved = readDraft();
+    if (saved) {
+      setForm(saved.form);
+      setSlip(saved.slip);
+    }
+    setDraftReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!draftReady) return;
+    sessionStorage.setItem(draftKey, JSON.stringify({ form, slip }));
+  }, [draftReady, form, slip]);
 
   function fill(complaint: DemoComplaint) {
     setForm({
@@ -84,7 +120,7 @@ export function IntakeDesk() {
           channel: form.channel,
           customerRef: form.customerRef.trim(),
           text: form.text.trim(),
-          sourceRef: example?.sourceRef ?? (form.sourceRef.trim() || `desk-${crypto.randomUUID()}`),
+          sourceRef: example?.sourceRef ?? (form.sourceRef.trim() || newSourceRef()),
           amount,
           rrn: form.rrn.trim() || null,
           accountMask: form.accountMask.trim() || null,
@@ -99,6 +135,19 @@ export function IntakeDesk() {
         return;
       }
       setSlip(filed);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("trace:new-complaint", {
+            detail: {
+              id: filed.interactionId,
+              customer: form.customerRef.trim(),
+              channel: form.channel,
+              text: form.text.trim(),
+              amount,
+            },
+          }),
+        );
+      }
       router.refresh();
     } catch {
       setError("Intake could not be reached.");
@@ -165,6 +214,7 @@ export function IntakeDesk() {
               setForm(emptyForm);
               setSlip(null);
               setError(null);
+              sessionStorage.removeItem(draftKey);
             }}
           >
             Clear form

@@ -58,9 +58,26 @@ async function Overview() {
 
       <section className="measures" aria-label="Book totals">
         <div className="measure">
-          <p className="measure-num">{book.interactions.length}</p>
+          <p className="measure-num">
+            {book.interactions.length}
+            {filedLive > 0 && (
+              <span
+                style={{
+                  fontSize: 13,
+                  color: "#b82424",
+                  marginLeft: 6,
+                  fontWeight: 600,
+                  fontFamily: "var(--font-mono), monospace",
+                }}
+              >
+                (+{filedLive} live)
+              </span>
+            )}
+          </p>
           <p className="measure-label">Complaints / messages</p>
-          <p className="measure-note">Across six intake channels</p>
+          <p className="measure-note">
+            {filedLive > 0 ? `${filedLive} streamed live on stage` : "Across six intake channels"}
+          </p>
         </div>
         <div className="measure">
           <p className="measure-num">{book.cases.length}</p>
