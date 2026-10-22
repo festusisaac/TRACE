@@ -10,7 +10,7 @@ This build is the demonstration for Zenith Bank Zecathon 6.0, track “AI-Powere
 
 ---
 
-##  Where and How AI is Used in TRACE
+## Where and How AI is Used in TRACE
 
 As mandated by responsible banking practices and the Zenith Bank Zecathon technical evaluation guidelines, TRACE clearly distinguishes between **generative intelligence** and **deterministic ledger truth**:
 
