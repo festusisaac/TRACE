@@ -48,10 +48,10 @@ export async function draftIncident(incident: IncidentResult): Promise<IncidentD
   try {
     const google = createGoogleGenerativeAI({ apiKey });
     const result = await generateText({
-      model: google("gemini-3.8-flash"),
+      model: google("gemini-2.5-flash"),
       temperature: 0.2,
       maxRetries: 0,
-      timeout: 25_000,
+      timeout: 15_000,
       output: Output.object({ schema: draftSchema, name: "IncidentDraft" }),
       system: [
         "You draft two texts for a bank complaints desk in Nigeria.",
@@ -69,7 +69,7 @@ export async function draftIncident(incident: IncidentResult): Promise<IncidentD
     const subject = output.subject.trim();
     const body = output.body.trim();
     if (![operatorNote, subject, body].every((part) => draftRespectsFacts(part, facts))) {
-      console.error("Gemini draft fell back because it changed a figure or promised an outcome.");
+      console.warn("Gemini draft fell back to template because it changed a figure or promised an outcome.");
       return fallback;
     }
     const draft: IncidentDraft = { operatorNote, subject, body, source: "gemini", facts };
@@ -78,7 +78,7 @@ export async function draftIncident(incident: IncidentResult): Promise<IncidentD
   } catch (error) {
     const name = error instanceof Error ? error.name : "Error";
     const status = error && typeof error === "object" && "statusCode" in error ? (error as { statusCode?: number }).statusCode : undefined;
-    console.error(`Gemini draft fell back (${name}${status ? ` ${status}` : ""}).`);
+    console.warn(`Gemini draft fell back to template (${name}${status ? ` ${status}` : ""}).`);
     return fallback;
   }
 }
