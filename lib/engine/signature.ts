@@ -110,7 +110,7 @@ const titles: Record<string, string> = {
   loan_silence: "Loan decision silence",
   branch_conduct: "Branch staff conduct",
   wrong_information: "Wrong information at a branch",
-  emergency_freeze: "🚨 CRITICAL: Customer Under Duress (One Chance / Robbery)",
+  emergency_freeze: "CRITICAL: Customer Under Duress (One Chance / Robbery)",
 };
 
 export function titleFor(complaintType: string, scope: Scope, location: string | null) {

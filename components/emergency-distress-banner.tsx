@@ -3,8 +3,17 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ShieldIcon, ZapIcon } from "@/components/icons";
+import {
+  ShieldIcon,
+  LockIcon,
+  CheckCircleIcon,
+  SirenIcon,
+  Volume2Icon,
+  VolumeXIcon,
+  XCloseIcon,
+} from "@/components/icons";
 import { channelName, lagosTime } from "@/lib/format.ts";
+import { startEmergencyAlarmLoop, stopEmergencyAlarmLoop } from "@/lib/audio-alarm.ts";
 
 type EmergencyData = {
   hasEmergency: boolean;
@@ -23,6 +32,7 @@ export function EmergencyDistressBanner() {
   const [data, setData] = useState<EmergencyData | null>(null);
   const [freezing, setFreezing] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [alarmMuted, setAlarmMuted] = useState(false);
 
   const checkEmergency = async () => {
     try {
@@ -42,9 +52,32 @@ export function EmergencyDistressBanner() {
     return () => clearInterval(interval);
   }, []);
 
+  // Strong beeping emergency alarm trigger
+  useEffect(() => {
+    if (data?.hasEmergency && !data.isPndApplied && !dismissed && !alarmMuted) {
+      startEmergencyAlarmLoop({ volume: 0.42 });
+    } else {
+      stopEmergencyAlarmLoop();
+    }
+    return () => {
+      stopEmergencyAlarmLoop();
+    };
+  }, [data?.hasEmergency, data?.isPndApplied, dismissed, alarmMuted]);
+
+  const toggleAlarmSound = () => {
+    if (alarmMuted) {
+      setAlarmMuted(false);
+      startEmergencyAlarmLoop({ volume: 0.42 });
+    } else {
+      setAlarmMuted(true);
+      stopEmergencyAlarmLoop();
+    }
+  };
+
   const handleApplyPnd = async () => {
     if (!data?.incidentId) return;
     setFreezing(true);
+    stopEmergencyAlarmLoop();
     try {
       const res = await fetch("/api/emergency", {
         method: "POST",
@@ -121,11 +154,15 @@ export function EmergencyDistressBanner() {
                   fontWeight: 800,
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
-                  padding: "2px 8px",
+                  padding: "3px 8px",
                   borderRadius: 4,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
                 }}
               >
-                🚨 CRITICAL DISTRESS ALARM · ROBBERY / ONE CHANCE UNDER DURESS
+                <SirenIcon size={14} />
+                CRITICAL DISTRESS ALARM · ROBBERY / ONE CHANCE UNDER DURESS
               </span>
               <span style={{ fontSize: 12, color: "#fecaca", fontWeight: 600 }}>
                 Customer: {data.customerRef}
@@ -150,8 +187,34 @@ export function EmergencyDistressBanner() {
           </div>
         </div>
 
-        {/* Right Actions: Instant PND Freeze & Quick Links */}
+        {/* Right Actions: Instant PND Freeze, Alarm Toggle & Quick Links */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          {/* Sound Alarm Mute / Unmute Button */}
+          {!data.isPndApplied && (
+            <button
+              type="button"
+              onClick={toggleAlarmSound}
+              style={{
+                background: alarmMuted ? "rgba(255, 255, 255, 0.15)" : "#dc2626",
+                color: "#ffffff",
+                border: "1px solid rgba(255, 255, 255, 0.3)",
+                borderRadius: 5,
+                padding: "8px 12px",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                transition: "all 0.15s ease",
+              }}
+              title={alarmMuted ? "Alarm sound is muted. Click to enable loud siren" : "Click to silence siren"}
+            >
+              {alarmMuted ? <VolumeXIcon size={14} /> : <Volume2Icon size={14} />}
+              <span>{alarmMuted ? "Sound Muted" : "Mute Siren"}</span>
+            </button>
+          )}
+
           {!data.isPndApplied ? (
             <button
               type="button"
@@ -166,7 +229,7 @@ export function EmergencyDistressBanner() {
                 fontSize: 13,
                 fontWeight: 700,
                 cursor: "pointer",
-                display: "flex",
+                display: "inline-flex",
                 alignItems: "center",
                 gap: 7,
                 boxShadow: "0 4px 12px rgba(0, 0, 0, 0.25)",
@@ -174,8 +237,8 @@ export function EmergencyDistressBanner() {
               }}
               title="Apply Post-No-Debit (PND) freeze immediately"
             >
-              <ZapIcon size={14} />
-              <span>{freezing ? "Executing Freeze…" : "🔒 Apply Instant PND Freeze"}</span>
+              <LockIcon size={14} />
+              <span>{freezing ? "Executing Freeze…" : "Apply Instant PND Freeze"}</span>
             </button>
           ) : (
             <span
@@ -187,12 +250,13 @@ export function EmergencyDistressBanner() {
                 padding: "6px 14px",
                 fontSize: 12,
                 fontWeight: 700,
-                display: "flex",
+                display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
               }}
             >
-              <span>✓ PND Applied · Account Locked & Cards Hotlisted</span>
+              <CheckCircleIcon size={15} />
+              <span>PND Applied · Account Locked & Cards Hotlisted</span>
             </span>
           )}
 
@@ -226,18 +290,23 @@ export function EmergencyDistressBanner() {
 
           <button
             type="button"
-            onClick={() => setDismissed(true)}
+            onClick={() => {
+              stopEmergencyAlarmLoop();
+              setDismissed(true);
+            }}
             style={{
               background: "transparent",
               border: "none",
               color: "#fca5a5",
               cursor: "pointer",
-              fontSize: 16,
               padding: "4px 8px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
             title="Acknowledge & Hide banner"
           >
-            ✕
+            <XCloseIcon size={16} />
           </button>
         </div>
       </div>

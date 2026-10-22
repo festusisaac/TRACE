@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { PortfolioDeflectionSummary } from "@/lib/engine/deflection.ts";
 import { naira } from "@/lib/format.ts";
+import { PhoneCallIcon } from "@/components/icons";
 
 export function DeflectionBanner({ summary }: { summary: PortfolioDeflectionSummary }) {
   if (summary.potentialAdvisoriesCount === 0) return null;
@@ -33,11 +34,10 @@ export function DeflectionBanner({ summary }: { summary: PortfolioDeflectionSumm
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: 18,
             flexShrink: 0,
           }}
         >
-          📞
+          <PhoneCallIcon size={18} />
         </div>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

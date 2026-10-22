@@ -238,8 +238,8 @@ export const SURGE_SCENARIOS: SurgeScenario[] = [
   },
   {
     id: "distress_surge",
-    title: "🚨 Emergency Distress & Duress Freeze ('One Chance' Robbery)",
-    shortLabel: "🚨 One Chance Distress Alarm",
+    title: "Emergency Distress & Duress Freeze ('One Chance' Robbery)",
+    shortLabel: "One Chance Distress Alarm",
     incidentTargetId: "inc-service-fraud-distress-emergency-freeze-distress-881",
     category: "Critical · Distress Alarm",
     description: "Customer abducted in a 'one chance' commercial vehicle at gunpoint. Sends desperate distress message via USSD/SMS demanding immediate account freeze.",

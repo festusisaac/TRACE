@@ -95,7 +95,7 @@ export const demoComplaints: DemoComplaint[] = [
     id: "distress-one-chance",
     step: "7",
     channel: "ussd",
-    title: "🚨 EMERGENCY: One Chance / Armed Duress",
+    title: "EMERGENCY: One Chance / Armed Duress",
     cue: "A terrified customer sends an urgent message to freeze their account after being abducted in a cab.",
     expect: "Immediately triggers Urgency 100/100, sounds the Red Distress Alarm, and offers 1-click PND freeze.",
     customerRef: "DISTRESS-881",

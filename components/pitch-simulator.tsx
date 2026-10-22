@@ -6,6 +6,7 @@ import {
   CheckCircleIcon,
   PlayIcon,
   RotateCcwIcon,
+  SirenIcon,
   SmartphoneIcon,
   Volume2Icon,
   VolumeXIcon,
@@ -14,6 +15,7 @@ import {
 } from "@/components/icons";
 import { SURGE_SCENARIOS, type SurgeScenario } from "@/lib/engine/surge-scenarios.ts";
 import { naira } from "@/lib/format.ts";
+import { playEmergencyAlarm } from "@/lib/audio-alarm.ts";
 
 export function PitchSimulator() {
   const router = useRouter();
@@ -48,14 +50,14 @@ export function PitchSimulator() {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = "sine";
-      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1); // A5
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+      osc.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.08); // A5
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start();
-      osc.stop(ctx.currentTime + 0.25);
+      osc.stop(ctx.currentTime + 0.28);
     } catch {
       // Audio autoplay policy fallback
     }
@@ -64,7 +66,16 @@ export function PitchSimulator() {
   const showNotification = (customer: string, channel: string, text: string, amount: number | null) => {
     const toastToken = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     setLatestToast({ id: toastToken, customer, channel, text, amount });
-    playChime();
+    if (soundEnabled) {
+      const isDistress =
+        /one chance|kidnap|robbery|gunpoint|duress|block my account|freeze my account|draining/i.test(text) ||
+        selectedScenario === "distress_surge";
+      if (isDistress) {
+        playEmergencyAlarm({ volume: 0.45 });
+      } else {
+        playChime();
+      }
+    }
     setTimeout(() => {
       setLatestToast((prev) => (prev?.id === toastToken ? null : prev));
     }, 4500);
@@ -386,7 +397,7 @@ export function PitchSimulator() {
             }}
           />
           <ZapIcon size={16} />
-          <span>{isStreaming ? `Surge Ingesting (${streamIndex}/${streamTotal})` : "⚡ Pitch Simulator"}</span>
+          <span>{isStreaming ? `Surge Ingesting (${streamIndex}/${streamTotal})` : "Pitch Simulator"}</span>
         </button>
       )}
 
