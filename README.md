@@ -8,6 +8,37 @@ The figures on the screen are counts from the book. A language model does not in
 
 This build is the demonstration for Zenith Bank Zecathon 6.0, track “AI-Powered Transaction Investigation and Resolution” (live sprint 20–22 October 2026). The data is synthetic Nigerian banking data. TRACE does not connect to a core-banking system and does not copy Zenith’s logo or trademark styling.
 
+---
+
+## 🤖 Where and How AI is Used in TRACE
+
+As mandated by responsible banking practices and the Zenith Bank Zecathon technical evaluation guidelines, TRACE clearly distinguishes between **generative intelligence** and **deterministic ledger truth**:
+
+### 1. Where AI is Used
+* **Empathetic Customer Reply Synthesis (`lib/draft.ts`, `POST /api/brief`)**:
+  * **Model**: Google Gemini 2.5 Flash via `@ai-sdk/google`.
+  * **Role**: Translates complex, technical payment switch failure telemetry (e.g., *NIP Response 97 timeout, uncredited debit*) into clear, empathetic, and human-readable customer communication drafts for frontline agents.
+* **Proactive In-App Advisory Drafting (`lib/engine/deflection.ts`, `components/advisory-modal.tsx`)**:
+  * **Role**: Generates contextual, broadcast-ready customer reassurance copy for Zenith Mobile Banking banners to prevent panic-driven call centre spikes during active switch incidents.
+
+### 2. How AI is Bound & Controlled (Zero-Hallucination Guardrails)
+To prevent financial hallucinations in banking operations, TRACE implements strict multi-layer boundaries:
+1. **Deterministic Fact-Packets Only**: The LLM is never given direct database or ledger access. It receives a strictly pre-computed `BriefFacts` object containing verified customer counts, naira values, response codes, locations, and assigned teams.
+2. **Post-Generation Fact Verification (`lib/brief-facts.ts -> draftRespectsFacts`)**:
+   * Every LLM response is programmatically validated against the fact packet before it reaches the UI.
+   * If the model alters or introduces unverified currency figures, or claims funds have already been refunded when the ledger says otherwise, the draft is **hard-rejected**.
+3. **Deterministic Fallbacks (`lib/brief.ts`)**:
+   * If the AI model times out, is offline, or is rejected by fact validation, TRACE automatically falls back to deterministic pre-approved banking templates with zero downtime.
+
+### 3. Where AI is Deliberately NOT Used (The Deterministic Core)
+In compliance with enterprise banking safety:
+* **Financial Calculations**: Naira exposure, transaction amounts, and totals are computed strictly via deterministic math.
+* **Incident Clustering & Emergence**: Signal thresholds (Systemic vs. Emerging vs. Isolated) are determined by mathematical baselines (`lib/engine/investigate.ts`).
+* **CBN Regulatory SLAs & Penalties**: 24h NIP, 48h POS, and 72h service countdowns and ₦10,000/day fine models are 100% deterministic code (`lib/engine/cbn.ts`).
+* **Transaction Matching**: Linking complaints to core-banking transactions via RRNs, account masks, and time windows is strictly algorithmic (`lib/engine/link.ts`).
+
+---
+
 ## What has been built
 
 | Piece | Where it lives | State |
