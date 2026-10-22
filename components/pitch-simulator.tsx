@@ -71,7 +71,7 @@ export function PitchSimulator() {
         /one chance|kidnap|robbery|gunpoint|duress|block my account|freeze my account|draining/i.test(text) ||
         selectedScenario === "distress_surge";
       if (isDistress) {
-        playEmergencyAlarm({ volume: 0.45 });
+        playEmergencyAlarm({ volume: 0.32 });
       } else {
         playChime();
       }

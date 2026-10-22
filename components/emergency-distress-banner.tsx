@@ -52,10 +52,10 @@ export function EmergencyDistressBanner() {
     return () => clearInterval(interval);
   }, []);
 
-  // Strong beeping emergency alarm trigger
+  // Modern command center chime trigger
   useEffect(() => {
     if (data?.hasEmergency && !data.isPndApplied && !dismissed && !alarmMuted) {
-      startEmergencyAlarmLoop({ volume: 0.42 });
+      startEmergencyAlarmLoop({ volume: 0.32 });
     } else {
       stopEmergencyAlarmLoop();
     }
@@ -67,7 +67,7 @@ export function EmergencyDistressBanner() {
   const toggleAlarmSound = () => {
     if (alarmMuted) {
       setAlarmMuted(false);
-      startEmergencyAlarmLoop({ volume: 0.42 });
+      startEmergencyAlarmLoop({ volume: 0.32 });
     } else {
       setAlarmMuted(true);
       stopEmergencyAlarmLoop();
@@ -208,10 +208,10 @@ export function EmergencyDistressBanner() {
                 gap: 6,
                 transition: "all 0.15s ease",
               }}
-              title={alarmMuted ? "Alarm sound is muted. Click to enable loud siren" : "Click to silence siren"}
+              title={alarmMuted ? "Alert sound is muted. Click to enable chime" : "Click to silence chime"}
             >
               {alarmMuted ? <VolumeXIcon size={14} /> : <Volume2Icon size={14} />}
-              <span>{alarmMuted ? "Sound Muted" : "Mute Siren"}</span>
+              <span>{alarmMuted ? "Sound Muted" : "Mute Chime"}</span>
             </button>
           )}
 
