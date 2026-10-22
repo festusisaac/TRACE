@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   // this, Next blocks the dev connection and the complaint form reloads.
   allowedDevOrigins: ["10.*.*.*", "192.168.*.*", "172.*.*.*"],
   cacheComponents: true,
+  devIndicators: false,
   serverExternalPackages: ["@libsql/client"],
   partialPrefetching: true,
   turbopack: {
