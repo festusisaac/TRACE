@@ -40,6 +40,9 @@ export function EmergencyDistressBanner() {
       if (res.ok) {
         const json = (await res.json()) as EmergencyData;
         setData(json);
+        if (json.hasEmergency && !json.isPndApplied) {
+          setDismissed(false);
+        }
       }
     } catch {
       // silent fallback
@@ -50,6 +53,44 @@ export function EmergencyDistressBanner() {
     checkEmergency();
     const interval = setInterval(checkEmergency, 3000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Instant response to complaints filed on the desk in real-time
+  useEffect(() => {
+    const handleNewComplaint = (event: Event) => {
+      const custom = event as CustomEvent<{
+        id?: string;
+        customer: string;
+        channel: string;
+        text: string;
+        amount: number | null;
+        location?: string | null;
+      }>;
+      const text = custom.detail?.text || "";
+      const isDistress =
+        /one chance|kidnap|robbery|gunpoint|duress|block my account|freeze my account|draining|hostage/i.test(text);
+
+      if (isDistress && custom.detail) {
+        const customerRef = custom.detail.customer || "DISTRESS";
+        setData({
+          hasEmergency: true,
+          isPndApplied: false,
+          customerRef,
+          channel: custom.detail.channel,
+          text,
+          location: custom.detail.location || "Lagos",
+          receivedAt: new Date().toISOString(),
+          incidentId: `inc-service-fraud-distress-emergency-freeze-${customerRef.toLowerCase()}`,
+          caseId: `case-${customerRef.toLowerCase()}-service-emergency-freeze`,
+        });
+        setDismissed(false);
+        setAlarmMuted(false);
+        startEmergencyAlarmLoop({ volume: 0.32 });
+      }
+    };
+
+    window.addEventListener("trace:new-complaint", handleNewComplaint);
+    return () => window.removeEventListener("trace:new-complaint", handleNewComplaint);
   }, []);
 
   // Modern command center chime trigger

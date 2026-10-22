@@ -91,7 +91,7 @@ export function startEmergencyAlarmLoop(options?: { volume?: number }) {
   playEmergencyAlarm(options);
   activeLoopInterval = setInterval(() => {
     playEmergencyAlarm(options);
-  }, 4200);
+  }, 2000);
 }
 
 /**

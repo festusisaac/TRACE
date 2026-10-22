@@ -15,7 +15,7 @@ import {
 } from "@/components/icons";
 import { SURGE_SCENARIOS, type SurgeScenario } from "@/lib/engine/surge-scenarios.ts";
 import { naira } from "@/lib/format.ts";
-import { playEmergencyAlarm } from "@/lib/audio-alarm.ts";
+import { playEmergencyAlarm, startEmergencyAlarmLoop, stopEmergencyAlarmLoop } from "@/lib/audio-alarm.ts";
 
 export function PitchSimulator() {
   const router = useRouter();
@@ -71,7 +71,7 @@ export function PitchSimulator() {
         /one chance|kidnap|robbery|gunpoint|duress|block my account|freeze my account|draining/i.test(text) ||
         selectedScenario === "distress_surge";
       if (isDistress) {
-        playEmergencyAlarm({ volume: 0.32 });
+        startEmergencyAlarmLoop({ volume: 0.32 });
       } else {
         playChime();
       }
