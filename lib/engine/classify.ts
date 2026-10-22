@@ -7,6 +7,17 @@ type Rule = Classification & {
 const rules: Rule[] = [
   {
     domain: "service",
+    complaintType: "emergency_freeze",
+    journey: "fraud_distress",
+    failureMode: "account_freeze_requested",
+    evidence: "EMERGENCY: Immediate distress or robbery signal detected (e.g. one chance, armed robbery, kidnapped, gunpoint, stolen phone). Urgent PND / account freeze required.",
+    test: (text) =>
+      /one chance|kidnap|armed robber|gunpoint|under duress|stolen phone|phone (?:was |got )?stolen|snatched my phone|block my account|freeze my account|hotlist my card|drain(?:ing)? my (?:account|money)|hold my account|emergency block/.test(
+        text,
+      ),
+  },
+  {
+    domain: "service",
     complaintType: "branch_conduct",
     journey: "branch_service",
     failureMode: "staff_conduct",

@@ -15,6 +15,7 @@ const complaintNames: Record<string, string> = {
   loan_silence: "Loan decision",
   branch_conduct: "Staff conduct",
   wrong_information: "Wrong information",
+  emergency_freeze: "Emergency Freeze (Duress)",
 };
 
 const channelNames: Record<Channel, string> = {

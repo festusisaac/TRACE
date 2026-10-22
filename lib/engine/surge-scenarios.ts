@@ -12,11 +12,11 @@ export type SurgeComplaintTemplate = {
 };
 
 export type SurgeScenario = {
-  id: "nip_surge" | "pos_surge" | "auth_surge";
+  id: "nip_surge" | "pos_surge" | "auth_surge" | "distress_surge";
   title: string;
   shortLabel: string;
   incidentTargetId: string;
-  category: "Payment · Systemic" | "Payment · Emerging" | "Service · Access";
+  category: "Payment · Systemic" | "Payment · Emerging" | "Service · Access" | "Critical · Distress Alarm";
   description: string;
   expectedOutcome: string;
   complaints: SurgeComplaintTemplate[];
@@ -233,6 +233,27 @@ export const SURGE_SCENARIOS: SurgeScenario[] = [
         rrn: null,
         beneficiary: null,
         location: "Port Harcourt",
+      },
+    ],
+  },
+  {
+    id: "distress_surge",
+    title: "🚨 Emergency Distress & Duress Freeze ('One Chance' Robbery)",
+    shortLabel: "🚨 One Chance Distress Alarm",
+    incidentTargetId: "inc-service-fraud-distress-emergency-freeze-distress-881",
+    category: "Critical · Distress Alarm",
+    description: "Customer abducted in a 'one chance' commercial vehicle at gunpoint. Sends desperate distress message via USSD/SMS demanding immediate account freeze.",
+    expectedOutcome: "Immediate Urgency 100/100, flashes persistent Red Alert Distress Alarm, and offers 1-click Post-No-Debit (PND) freeze to protect customer funds in seconds.",
+    complaints: [
+      {
+        channel: "ussd",
+        customerRef: "DISTRESS-881",
+        customerName: "Tunde Bakare (Victim under Duress)",
+        text: "HELP! I just entered one chance in Ikeja, they took my phone and card and have a gun to my head, BLOCK MY ACCOUNT NOW before they drain everything!",
+        amount: null,
+        rrn: null,
+        beneficiary: null,
+        location: "Ikeja, Lagos",
       },
     ],
   },

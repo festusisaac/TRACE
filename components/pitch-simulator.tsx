@@ -518,19 +518,23 @@ export function PitchSimulator() {
                           fontSize: 10,
                           padding: "2px 6px",
                           fontWeight: 600,
-                          color: scenario.category.includes("Systemic")
-                            ? "var(--systemic)"
-                            : scenario.category.includes("Emerging")
-                              ? "var(--emerging)"
-                              : "var(--isolated)",
-                          background: scenario.category.includes("Systemic")
-                            ? "var(--systemic-bg)"
-                            : scenario.category.includes("Emerging")
-                              ? "var(--emerging-bg)"
-                              : "var(--isolated-bg)",
+                          color: scenario.category.includes("Distress") || scenario.category.includes("Critical")
+                            ? "#ffffff"
+                            : scenario.category.includes("Systemic")
+                              ? "var(--systemic)"
+                              : scenario.category.includes("Emerging")
+                                ? "var(--emerging)"
+                                : "var(--isolated)",
+                          background: scenario.category.includes("Distress") || scenario.category.includes("Critical")
+                            ? "#b82424"
+                            : scenario.category.includes("Systemic")
+                              ? "var(--systemic-bg)"
+                              : scenario.category.includes("Emerging")
+                                ? "var(--emerging-bg)"
+                                : "var(--isolated-bg)",
                         }}
                       >
-                        {scenario.complaints.length} complaints
+                        {scenario.complaints.length} complaint{scenario.complaints.length > 1 ? "s" : ""}
                       </span>
                     </div>
                     <p style={{ margin: 0, fontSize: 11, color: "var(--muted)", lineHeight: 1.35 }}>

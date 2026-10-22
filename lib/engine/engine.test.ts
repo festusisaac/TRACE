@@ -238,3 +238,25 @@ test("acknowledging an incident drops its priority and marks members answered", 
   assert.ok(after.priority < incident.priority);
   assert.ok(acknowledged.interactions.every((item) => item.answerFromIncident));
 });
+
+test("detects emergency distress signal and one chance robbery intent", () => {
+  const result = classifyComplaint("HELP! I entered one chance in Ikeja, they took my phone and card, block my account immediately!");
+  assert.equal(result.domain, "service");
+  assert.equal(result.complaintType, "emergency_freeze");
+  assert.equal(result.journey, "fraud_distress");
+});
+
+test("assigns 100 maximum urgency score to emergency freeze distress complaints", () => {
+  const interactions = [
+    complaint({
+      id: "distress-test-1",
+      customerRef: "VICTIM-01",
+      text: "Armed robbers have a gun to my head, freeze my account now please!",
+    }),
+  ];
+  const result = investigate({ interactions, transactions: [], serviceRequests: [], asOf: AS_OF });
+  const incident = result.incidents.find((item) => item.signature.includes("emergency_freeze"));
+  assert.ok(incident);
+  assert.equal(incident.priority, 100);
+});
+

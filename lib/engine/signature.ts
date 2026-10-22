@@ -54,6 +54,12 @@ export function signatureFor(
     };
   }
 
+  if (classification.complaintType === "emergency_freeze") {
+    return {
+      signature: `service|fraud_distress|emergency_freeze|${slug(customerRef)}`,
+      scope: "customer",
+    };
+  }
   if (classification.complaintType === "branch_conduct") {
     return {
       signature: `service|branch_service|staff_conduct|${slug(customerRef)}`,
@@ -104,6 +110,7 @@ const titles: Record<string, string> = {
   loan_silence: "Loan decision silence",
   branch_conduct: "Branch staff conduct",
   wrong_information: "Wrong information at a branch",
+  emergency_freeze: "🚨 CRITICAL: Customer Under Duress (One Chance / Robbery)",
 };
 
 export function titleFor(complaintType: string, scope: Scope, location: string | null) {
@@ -114,6 +121,8 @@ export function titleFor(complaintType: string, scope: Scope, location: string |
 
 export function ownerFor(complaintType: string) {
   switch (complaintType) {
+    case "emergency_freeze":
+      return "fraud & security ops";
     case "failed_nip":
     case "delayed_reversal":
     case "duplicate_debit":
@@ -148,6 +157,11 @@ export function nextActionFor(
   acknowledged: boolean,
   location: string | null,
 ) {
+  if (complaintType === "emergency_freeze") {
+    return acknowledged
+      ? "PND Freeze Applied. Fraud & Security Ops is monitoring and active cards are hotlisted."
+      : "CRITICAL THREAT: Apply immediate Post-No-Debit (PND) freeze and hotlist active cards to protect customer funds.";
+  }
   if (acknowledged) return "Already accepted. Answer new messages from this incident.";
   if (label === "isolated" && complaintType === "wrong_beneficiary") {
     return "Investigate this customer alone. The transfer does not match a wider failure.";
@@ -241,6 +255,9 @@ export function scoreGroup(
 
   if (members.some((member) => member.channel === "social")) {
     parts.push(points("Reputation", "A social channel is already carrying this", domain === "service" ? 10 : 8));
+  }
+  if (members.some((member) => member.classification.complaintType === "emergency_freeze")) {
+    parts.push(points("Distress Alarm", "CRITICAL LIFE & FRAUD THREAT: Immediate PND freeze requested under duress", 100));
   }
   const channelCount = new Set(members.map((member) => member.channel)).size;
   if (channelCount >= 3) {

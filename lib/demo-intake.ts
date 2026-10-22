@@ -91,4 +91,16 @@ export const demoComplaints: DemoComplaint[] = [
     sourceRef: "pitch-email-conduct",
     location: "Yaba",
   },
+  {
+    id: "distress-one-chance",
+    step: "7",
+    channel: "ussd",
+    title: "🚨 EMERGENCY: One Chance / Armed Duress",
+    cue: "A terrified customer sends an urgent message to freeze their account after being abducted in a cab.",
+    expect: "Immediately triggers Urgency 100/100, sounds the Red Distress Alarm, and offers 1-click PND freeze.",
+    customerRef: "DISTRESS-881",
+    text: "HELP! I entered one chance in Ikeja, they took my phone and card and have a gun to my head, BLOCK MY ACCOUNT NOW before they drain everything!",
+    sourceRef: "pitch-distress-freeze",
+    location: "Ikeja",
+  },
 ];

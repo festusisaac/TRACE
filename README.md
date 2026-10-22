@@ -52,6 +52,7 @@ In compliance with enterprise banking safety:
 | Plain-language explanations | `lib/explain.ts`, `app/guide/page.tsx` | Done |
 | Template operator note and customer reply | `lib/brief.ts` | Done |
 | Gemini draft, with template fallback | `lib/draft.ts`, `POST /api/brief` | Done |
+| Emergency Distress & Instant PND Freeze Protocol (One Chance / Armed Robbery) | `components/emergency-distress-banner.tsx`, `app/api/emergency/route.ts` | Done, tested |
 
 ## Run the desk
 
@@ -83,7 +84,7 @@ Check the engine without starting the server:
 npm run test:engine
 ```
 
-Five tests cover classification, normalisation, the judge story, acknowledgement, and the seeded book.
+25 automated unit tests cover classification, normalisation, CBN regulatory SLAs & fines, proactive in-app deflection ROI, emergency distress detection, the judge story, acknowledgement, and the seeded book.
 
 ## The demonstration, in about three minutes
 
@@ -159,6 +160,7 @@ A signature is the stable identity of a problem. The incident id is `inc-` plus 
 
 | Situation | Signature | Scope |
 | --- | --- | --- |
+| Emergency freeze (One Chance / Robbery) | `fraud\|emergency_freeze\|{customer}` | customer |
 | NIP credit timeout | `payment\|failed_nip\|nip` | network |
 | Sign-in failure | `service\|authentication\|cannot_sign_in` | network |
 | POS settlement for a vendor | `payment\|pos_settlement\|{vendor}` | vendor |
@@ -172,9 +174,9 @@ Channel is not part of the sign-in signature, so an app report and a contact-cen
 
 ### Classification
 
-Rules are ordered. The text is lowercased. The first match wins. Service rules run before payment rules, so “told me the wrong thing” is not swallowed by the word “transfer”, and “I was debited and nobody at the branch will explain” stays a service complaint.
+Rules are ordered. The text is lowercased. The first match wins. Emergency distress detection runs highest priority before service or payment rules, so "armed robbery / one chance / block my account" immediately triggers the critical duress protocol.
 
-Order: staff conduct, wrong information, sign-in, OTP-for-sign-in, channel down, account opening, card delivery, loan silence, then wrong beneficiary, duplicate debit, POS settlement, card decline, delayed reversal, charge dispute, failed NIP.
+Order: emergency freeze (duress/robbery), staff conduct, wrong information, sign-in, OTP-for-sign-in, channel down, account opening, card delivery, loan silence, then wrong beneficiary, duplicate debit, POS settlement, card decline, delayed reversal, charge dispute, failed NIP.
 
 If nothing matches and the text mentions money, the fallback is `failed_nip`. Otherwise the fallback is `wrong_information`.
 
@@ -218,6 +220,7 @@ The parts are added and then clamped to 0–100.
 
 | Part | Points |
 | --- | --- |
+| Distress Alarm | 100 maximum urgency override for customer duress / emergency freeze |
 | Spread | Systemic 36, emerging 16, isolated 4 |
 | Customers | Distinct customers, capped at 20, times 2 for a payment and times 3 for a service |
 | Value in flight | Payments only: `min(25, round(log10(value + 1) × 6))` |
@@ -231,6 +234,7 @@ The parts are added and then clamped to 0–100.
 
 | Complaint | Team |
 | --- | --- |
+| Emergency freeze (One Chance / Robbery) | fraud & security ops |
 | Failed NIP, delayed reversal, duplicate debit, POS settlement | payments ops |
 | Card decline | cards |
 | Wrong beneficiary | contact centre |

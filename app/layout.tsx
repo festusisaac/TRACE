@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { DeskNav } from "@/components/desk-nav";
+import { EmergencyDistressBanner } from "@/components/emergency-distress-banner";
 import { GlobalSearch } from "@/components/global-search";
 import { LiveBook } from "@/components/live-book";
 import { PitchSimulator } from "@/components/pitch-simulator";
@@ -64,6 +65,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <LiveBook />
             </Suspense>
             <div className="workspace-main">
+              <EmergencyDistressBanner />
               <div className="main">{children}</div>
               <footer className="desk-foot">
                 <div className="status-key">
